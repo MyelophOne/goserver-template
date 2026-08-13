@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /*?*theme=
+
+User-agent: Yandex
+Allow: /
+Clean-param: utm_source&utm_medium&utm_campaign&utm_content&utm_term&gclid&sref&yadclid&ysclid&yclid&yadordid&fbclid&msclkid&from /
