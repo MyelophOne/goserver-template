@@ -2,7 +2,7 @@ module github.com/myelophone/goserver-template
 
 go 1.26.5
 
-require github.com/myelophone/goserver v1.0.0
+require github.com/myelophone/goserver v0.5.1
 
 require (
 	github.com/gorilla/websocket v1.5.3 // indirect
