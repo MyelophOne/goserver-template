@@ -5,9 +5,9 @@ A production-oriented Go backend boilerplate powered by [`@myelophone/goserver`]
 **[Create a new repository from this template](https://github.com/myelophone/goserver-template/generate)** · **[Open @myelophone/goserver documentation](https://github.com/myelophone/goserver)**
 
 > **Building a full-stack application?**
-> `@myelophone/goserver-template` works seamlessly with [`@myelophone/nuxt`](https://github.com/myelophone/nuxt), the companion frontend foundation. Start the frontend from [`myelophone/nuxt-template`](https://github.com/myelophone/nuxt-template), which provides a ready boilerplate for quickly creating the client side of an `@myelophone/goserver` application.
+> `@myelophone/goserver-template` works seamlessly with [`@myelophone/nuxt`](https://github.com/myelophone/nuxt), the companion frontend foundation. Start the frontend from [`@myelophone/nuxt-template`](https://github.com/myelophone/nuxt-template), which provides a ready boilerplate for quickly creating the client side of an `@myelophone/goserver` application.
 >
-> **[Open @myelophone/nuxt](https://github.com/myelophone/nuxt)** · **[Open nuxt-template](https://github.com/myelophone/nuxt-template)** · **[Create a frontend repository](https://github.com/myelophone/nuxt-template/generate)**
+> **[Open @myelophone/nuxt](https://github.com/myelophone/nuxt)** · **[Open @myelophone/nuxt-template](https://github.com/myelophone/nuxt-template)** · **[Create a frontend repository](https://github.com/myelophone/nuxt-template/generate)**
 
 Use this repository when you want to start building application routes and business logic immediately instead of assembling the server lifecycle, development tooling, directory layout, and deployment files yourself.
 
