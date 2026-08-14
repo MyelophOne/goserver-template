@@ -5,7 +5,7 @@ package app
 
 !! It is used by template and will be overwritten by updates. !!
 
-!! It shows an example of using goserver inside the project. !!
+!! It shows an example of using @myelophone/goserver inside the project. !!
 */
 
 import goserver "github.com/myelophone/goserver"

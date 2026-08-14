@@ -1,53 +1,69 @@
-# Node modules and dependencies
-node_modules
-.pnp/
-.pnp.js
-.yarn/install-state.gz
+# Version control
+.git/
+.github/
+.gitignore
 
-# Yarn and npm logs
-yarn-error.log
-yarn-debug.log*
-npm-debug.log*
+# Environment files and local secrets
+.env
+.env.*
 
-# nuxt / vue
-.nuxt
-.output
-
-# Build outputs
+# Go workspaces, caches, and build artifacts
+go.work
+go.work.sum
+vendor/
+tmp/
+bin/
 build/
 dist/
+.cache/
+.gocache/
 coverage/
+coverage.out
+coverage.html
+*.test
+*.exe
+*.out
+*.prof
+*.pprof
+*.trace
 
-# Docker files and configurations
+# Runtime and tool logs
+logs/
+*.log
+build-errors.log
+
+# Local development configuration
+.devcontainer/
+.vscode/
+.idea/
+.air.toml
+.golangci.yml
+.editorconfig
+taskfile.yml
+
+# Docker development files are not needed inside the image
 Dockerfile
 .dockerignore
 docker-compose.yml
+docker-compose.*.yml
 
-.git/
-.env.example
-.gitignore
+# Repository documentation not used at runtime
+README.md
+templates/_examples.md
 
-# Editor and IDE settings
-.vscode/
-.idea/
+# Optional frontend artifacts in a combined repository
+node_modules/
+.nuxt/
+.output/
+.pnp/
+.pnp.js
+.yarn/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# OS generated files
+# Operating-system and language tooling artifacts
 .DS_Store
 Thumbs.db
-
-# Miscellaneous
-logs/
-*.log
-tmp/
-.cache/
-
-load-test.yml
-biome.json
-.editorconfig
-vitest.config.ts
-README.md
-yarn.lock
-sample.json
-__tests__/
 __pycache__/
 *.pyc
