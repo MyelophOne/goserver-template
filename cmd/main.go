@@ -8,7 +8,6 @@ import (
 
 func main() {
 	httpPort := goserver.GetEnv("HTTP_PORT", "8080")
-	httpPort = ":" + httpPort
 
 	server := goserver.NewServer(httpPort)
 

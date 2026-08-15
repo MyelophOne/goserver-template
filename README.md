@@ -197,7 +197,7 @@ add operational routes and run
 The actual composition root is intentionally short:
 
 ```go
-server := goserver.NewServer(":" + goserver.GetEnv("HTTP_PORT", "8080"))
+server := goserver.NewServer(goserver.GetEnv("HTTP_PORT", "8080"))
 server.Defaults()
 
 tm := goserver.NewTemplateManager()
@@ -206,6 +206,8 @@ server.TemplatesMiddleware(tm)
 server.ApplyHooks()
 server.Run()
 ```
+
+`NewServer` accepts `HTTP_PORT=8080`, `HTTP_PORT=:8080`, and an accidentally duplicated `HTTP_PORT=::8080`; all three resolve to the listener address `:8080`. Complete addresses such as `127.0.0.1:8080` and `[::1]:8080` remain unchanged.
 
 This order has useful consequences:
 
