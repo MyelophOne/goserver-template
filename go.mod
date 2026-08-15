@@ -1,6 +1,6 @@
 module github.com/myelophone/goserver-template
 
-go 1.26.5
+go 1.26.6
 
 require github.com/myelophone/goserver v0.5.1
 
