@@ -2,8 +2,8 @@ github.com/gorilla/websocket v1.5.3 h1:saDtZ6Pbx/0u+bgYQ3q96pZgCzfhKXGPqt7kZ72aN
 github.com/gorilla/websocket v1.5.3/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
 github.com/hashicorp/golang-lru v1.0.2 h1:dV3g9Z/unq5DpblPpw+Oqcv4dU/1omnb4Ok8iPY6p1c=
 github.com/hashicorp/golang-lru v1.0.2/go.mod h1:iADmTwqILo4mZ8BN3D2Q6+9jd8WM5uGBxy+E8yxSoD4=
-github.com/myelophone/goserver v0.8.0 h1:XqsZq9QahAIb9/IXp763Cl6RgFQNdJqSt7A18q9j444=
-github.com/myelophone/goserver v0.8.0/go.mod h1:T5/+oOJhcXS/LawlvEFaKNU5mSAB6SepQ3B43up6ZMY=
+github.com/myelophone/goserver v0.8.1 h1:8EK+whZNCdfPAPj58dIK2K1pgj6I69gx+nMLim8MC6g=
+github.com/myelophone/goserver v0.8.1/go.mod h1:T5/+oOJhcXS/LawlvEFaKNU5mSAB6SepQ3B43up6ZMY=
 github.com/rs/xid v1.6.0 h1:fV591PaemRlL6JfRxGDEPl69wICngIQ3shQtzfy2gxU=
 github.com/rs/xid v1.6.0/go.mod h1:7XoLgs4eV+QndskICGsho+ADou8ySMSjJKDIan90Nz0=
 github.com/tdewolff/minify/v2 v2.24.17 h1:6AbitfVyq0M7aW6i+XL7+49DeTQZwloOMs9O574arBg=
