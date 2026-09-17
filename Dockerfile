@@ -1,6 +1,8 @@
+FROM node:26-alpine AS web-deps
+
 FROM golang:alpine AS builder
 
-RUN apk add --no-cache git
+RUN apk add --no-cache git libstdc++
 
 WORKDIR /app
 
@@ -9,23 +11,28 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
+COPY --from=web-deps /usr/local/bin/node /usr/local/bin/node
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GOFLAGS="-trimpath" go build -pgo=auto -ldflags="-s -w -X github.com/myelophone/goserver.AppEnv=prod -X github.com/myelophone/goserver.AppVersion=$(git rev-parse --short HEAD 2>/dev/null || echo unknown)" -o /app/goserver ./cmd/main.go
+RUN APP_ENV=prod GIT_COMMIT_HASH=$(git rev-parse --short HEAD 2>/dev/null || echo unknown) \
+    go run -tags webcli ./cmd generate \
+    && APP_ENV=prod GIT_COMMIT_HASH=$(git rev-parse --short HEAD 2>/dev/null || echo unknown) \
+    go run -tags webcli ./cmd build
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GOFLAGS="-trimpath" go build -ldflags="-s -w" -o /app/healthcheck ./cmd/healthcheck
+FROM alpine:latest
 
-FROM gcr.io/distroless/static:nonroot
+WORKDIR /app
 
-WORKDIR /home/nonroot/app
+RUN apk add --no-cache ca-certificates \
+    && addgroup -S goserver \
+    && adduser -S -G goserver -h /app goserver
 
-COPY --from=builder /app/assets ./assets
-COPY --from=builder /app/templates ./templates
-COPY --from=builder /app/goserver .
-COPY --from=builder /app/healthcheck .
-COPY --from=builder /app/LICENSE ./LICENSE
+COPY --chown=goserver:goserver --from=builder /app/dist/ ./
+COPY --chown=goserver:goserver --from=builder /app/LICENSE ./LICENSE
+
+USER goserver
 
 LABEL org.opencontainers.image.title="@myelophone/goserver-template"
-LABEL org.opencontainers.image.description="High-performance Go server app based on @myelophone/goserver by @myeloph.one"
+LABEL org.opencontainers.image.description="Production-ready Go application template with optional SSR web mode by @myeloph.one"
 LABEL org.opencontainers.image.authors="Aliaksandr Ivanou"
 LABEL org.opencontainers.image.licenses="PolyForm-Noncommercial-1.0.0"
 LABEL org.opencontainers.image.vendor="Aliaksandr Ivanou"

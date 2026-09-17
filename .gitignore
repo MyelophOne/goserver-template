@@ -515,3 +515,7 @@ coverage.html
 
 # local resources
 .local/
+web/system/generated/*
+!web/system/generated/stub.go
+internal/goservergen/
+cmd/web_import_gen.go

@@ -1,69 +1,59 @@
-# Version control
-.git/
-.github/
-.gitignore
+# Node modules and dependencies
+node_goshodules
+.pnp/
+.pnp.js
+.yarn/install-state.gz
 
-# Environment files and local secrets
-.env
-.env.*
+# Yarn and npm logs
+yarn-error.log
+yarn-debug.log*
+npm-debug.log*
 
-# Go workspaces, caches, and build artifacts
-go.work
-go.work.sum
-vendor/
-tmp/
-bin/
+# nuxt / vue
+.nuxt
+.output
+
+# Build outputs
 build/
 dist/
-.cache/
-.gocache/
 coverage/
-coverage.out
-coverage.html
-*.test
-*.exe
-*.out
-*.prof
-*.pprof
-*.trace
 
-# Runtime and tool logs
-logs/
-*.log
-build-errors.log
-
-# Local development configuration
-.devcontainer/
-.vscode/
-.idea/
-.air.toml
-.golangci.yml
-.editorconfig
-taskfile.yml
-
-# Docker development files are not needed inside the image
+# Docker files and configurations
 Dockerfile
 .dockerignore
 docker-compose.yml
-docker-compose.*.yml
 
-# Repository documentation not used at runtime
-README.md
-templates/_examples.md
+#.git/
+#.git/
+#!git/HEAD
+#!git/refs
+.env.example
+.gitignore
+.gitkeep
 
-# Optional frontend artifacts in a combined repository
-node_modules/
-.nuxt/
-.output/
-.pnp/
-.pnp.js
-.yarn/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# Editor and IDE settings
+.vscode/
+.idea/
 
-# Operating-system and language tooling artifacts
+# OS generated files
 .DS_Store
 Thumbs.db
+
+# Miscellaneous
+logs/
+*.log
+tmp/
+.cache/
+internal/goservergen/
+cmd/web_import_gen.go
+
+load-test.yml
+biome.json
+.editorconfig
+vitest.config.ts
+README.md
+yarn.lock
+sample.json
+__tests__/
 __pycache__/
 *.pyc

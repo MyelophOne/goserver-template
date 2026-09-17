@@ -1,7 +1,5 @@
-# Корневой файл EditorConfig
 root = true
 
-# Для всех файлов используем unix-совместимые переносы строк
 [*]
 indent_style = tab
 charset = utf-8

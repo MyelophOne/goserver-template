@@ -8,34 +8,133 @@ vars:
     sh: git rev-parse --short HEAD || echo "dev"
   EXT:
     sh: go env GOEXE
-  BIN: "./tmp/goserver{{.EXT}}"
+  BIN: "./dist/goserver{{.EXT}}"
+  WEBBIN: "./dist/goserver{{.EXT}}"
 
 tasks:
-  run:
-    env:
-      APP_ENV: dev
+  setup:
+    desc: Install the required Tailwind and client-entry builders for GOSH
+    silent: true
     cmds:
-      - go run ./cmd/main.go
-  dev:
-    env:
-      APP_ENV: dev
-      METRICS_ENABLED: true
+      - go run -tags webcli ./cmd setup
+  setup:tailwind:
+    silent: true
     cmds:
-      - air -c .air.toml
-  preview:
+      - task: setup
+  setup:client:
+    silent: true
+    cmds:
+      - task: setup
+  web:audit:
+    desc: Report unused assets; never deletes source files
+    silent: true
+    cmds:
+      - go run -tags webcli ./cmd audit
+      - cmd: echo "Unused assets report is ready."
+  web:clean:
+    desc: "Optional: remove generated GOSH build output and the audit report"
+    silent: true
+    cmds:
+      - cmd: echo "Start cleaning build output and the audit report..."
+      - go run -tags webcli ./cmd clean
+  web:generate:
+    desc: Generate @server handler bindings from GOSH directives
+    silent: true
+    deps: [setup]
+    cmds:
+      - go run -tags webcli ./cmd generate
+  web:asset-report:
+    silent: true
+    deps: [setup]
     env:
       APP_ENV: prod
+      MYELOPHONE_WEB_ASSET_REPORT: tmp/web-assets.json
     cmds:
-      - go run ./cmd/main.go
-  build:
+      - go run -tags webcli ./cmd generate
+  web:build:
+    desc: Build a standalone production web distribution in dist/
+    silent: true
+    deps: [setup]
     env:
       APP_ENV: prod
       GIT_COMMIT_HASH: "{{.GIT_HASH}}"
     cmds:
-      - CGO_ENABLED=0 GOFLAGS="-trimpath" go build -pgo=auto -ldflags="-s -w -X github.com/myelophone/goserver.AppEnv=prod -X github.com/myelophone/goserver.AppVersion=${GIT_COMMIT_HASH}" -o {{.BIN}} ./cmd/main.go
-  view:
+      - go run -tags webcli ./cmd generate
+      - go run -tags webcli ./cmd build
+  web:build:profile:
+    desc: Build a production web distribution with Server-Timing profiling enabled
+    silent: true
+    deps: [setup]
+    env:
+      APP_ENV: prod
+      GIT_COMMIT_HASH: "{{.GIT_HASH}}"
+      MYELOPHONE_WEB_RENDER_SERVER_TIMING: "true"
     cmds:
-      - "{{.BIN}} {{.CLI_ARGS}}"
+      - go run -tags webcli ./cmd generate
+      - go run -tags webcli ./cmd build
+  run:
+    env:
+      APP_ENV: dev
+    silent: true
+    cmds:
+      - cmd: echo "Start running app..."
+      - task: web:generate
+      - go run ./cmd
+  dev:
+    env:
+      APP_ENV: dev
+    silent: true
+    cmds:
+      - cmd: echo "Start dev running app..."
+      - task: web:generate
+      - air -c .air.toml
+  preview:
+    env:
+      APP_ENV: prod
+    silent: true
+    cmds:
+      - cmd: echo "Start previewing app..."
+      - task: web:generate
+      - go run ./cmd
+  profile:
+    silent: true
+    env:
+      MYELOPHONE_WEB_RENDER_SERVER_TIMING: "true"
+    cmds:
+      - cmd: echo "Start building app with profiling..."
+      - task: web:build:profile
+      - cmd: echo "Done! Use \"task server\" command to run it."
+  build:
+    silent: true
+    cmds:
+      - cmd: echo "Start building app..."
+      - task: web:build
+      - cmd: echo "Done! Use \"task server\" command to run it."
+  build:server:
+    internal: true
+    silent: true
+    env:
+      APP_ENV: prod
+      GIT_COMMIT_HASH: "{{.GIT_HASH}}"
+    cmds:
+      - CGO_ENABLED=0 GOFLAGS="-trimpath" go build -tags myelophone_prod -pgo=auto -ldflags="-s -w -X github.com/myelophone/goserver.AppEnv=prod -X github.com/myelophone/goserver.AppVersion=${GIT_COMMIT_HASH}" -o {{.BIN}} ./cmd
+  server:
+    silent: true
+    cmds:
+      - cmd: echo "Starting app..."
+      - task: server:web
+  server:web:
+    internal: true
+    silent: true
+    dir: dist
+    cmds:
+      - "./goserver{{.EXT}} {{.CLI_ARGS}}"
+  server:plain:
+    internal: true
+    silent: true
+    dir: dist
+    cmds:
+      - "./goserver{{.EXT}} {{.CLI_ARGS}}"
   lint:
     cmds:
       - golangci-lint run
@@ -53,7 +152,7 @@ tasks:
       - go test -v ./...
   clean:
     cmds:
-      - go clean -modcache
+      - go clean -cache
   cover:
     desc: Run tests with coverage
     cmds:
@@ -83,19 +182,28 @@ tasks:
   critic:
     cmds:
       - go-critic check ./...
+  osv:
+    cmds:
+      - osv-scanner scan source -r .
   optimize:
     cmds:
       - task: format
       - task: lint
       - task: vet
       - task: vulncheck
+      - task: osv
       #- task: critic # temporarily commented out as it does not support go 1.27 yet
       - task: bafix
   loadtest:
     cmds:
-      - bombardier -c 50 -n 1000 -l -t 2s -d 10s http://localhost:8080
-      - bombardier -c 100 -n 5000 -l -t 2s -d 10s http://localhost:8080
-      - bombardier -c 200 -n 10000 -l -t 2s -d 10s http://localhost:8080
+      - bombardier -c 10 -d 10s http://localhost:8080
+      - bombardier -c 50 -d 15s -l http://localhost:8080
+      - bombardier -c 100 -d 15s -l http://localhost:8080
+      - bombardier -c 250 -d 15s -l http://localhost:8080
+      - bombardier -c 500 -d 15s -l http://localhost:8080
+      - bombardier -c 1000 -d 15s -l http://localhost:8080
+      - bombardier -c 2000 -d 15s -l http://localhost:8080
+      - bombardier -c 250 -d 3m -l http://localhost:8080
   analyze-web:
     deps: [build]
     cmds:
@@ -147,3 +255,9 @@ tasks:
         echo "New tag: $NEW_TAG"
         git tag $NEW_TAG
         git push origin $NEW_TAG
+  pprof:
+    desc: "Pprof analyze. Example: task pprof -- ~/Downloads/heap.pb.gz"
+    cmds:
+      - go tool pprof -http=:8080 {{.CLI_ARGS}}
+    preconditions:
+      - sh: 'test -n "{{.CLI_ARGS}}"'
