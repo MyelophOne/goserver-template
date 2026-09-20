@@ -14,8 +14,8 @@ github.com/bogdanfinn/utls v1.7.8-barnius h1:wRT83mP4hmuMM1/lIpLKKhzaEuyEKjux7VS
 github.com/bogdanfinn/utls v1.7.8-barnius/go.mod h1:o5v09jf+9ayMEfcP+8sssNdSMm278cyhBV25H8jb5Lw=
 github.com/bogdanfinn/websocket v1.5.6-barnius h1:QpdWVEZ9rKtcT7C2pU19uE2KQw2XevuKTDTzLxfDi/I=
 github.com/bogdanfinn/websocket v1.5.6-barnius/go.mod h1:41/rXLDWpqJ5A4gOKSY/z4NLbW/hHZHneRcYM0kbpxA=
-github.com/cloudflare/circl v1.6.2 h1:hL7VBpHHKzrV5WTfHCaBsgx/HGbBYlgrwvNXEVDYYsQ=
-github.com/cloudflare/circl v1.6.2/go.mod h1:2eXP6Qfat4O/Yhh8BznvKnJ+uzEoTQ6jVKJRn81BiS4=
+github.com/cloudflare/circl v1.6.3 h1:9GPOhQGF9MCYUeXyMYlqTR6a5gTrgR/fBLXvUgtVcg8=
+github.com/cloudflare/circl v1.6.3/go.mod h1:2eXP6Qfat4O/Yhh8BznvKnJ+uzEoTQ6jVKJRn81BiS4=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/gorilla/websocket v1.5.3 h1:saDtZ6Pbx/0u+bgYQ3q96pZgCzfhKXGPqt7kZ72aNNg=

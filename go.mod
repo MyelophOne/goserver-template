@@ -13,7 +13,7 @@ require (
 	github.com/bogdanfinn/tls-client v1.16.0 // indirect
 	github.com/bogdanfinn/utls v1.7.8-barnius // indirect
 	github.com/bogdanfinn/websocket v1.5.6-barnius // indirect
-	github.com/cloudflare/circl v1.6.2 // indirect
+	github.com/cloudflare/circl v1.6.3 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/hashicorp/golang-lru v1.0.2 // indirect
 	github.com/klauspost/compress v1.18.2 // indirect
