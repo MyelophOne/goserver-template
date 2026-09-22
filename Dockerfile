@@ -6,6 +6,8 @@ RUN apk add --no-cache git libstdc++
 
 WORKDIR /app
 
+ARG MYELOPHONE_WEB_ENABLED
+
 COPY go.mod go.sum ./
 
 RUN go mod download
@@ -13,10 +15,15 @@ RUN go mod download
 COPY . .
 COPY --from=web-deps /usr/local/bin/node /usr/local/bin/node
 
-RUN APP_ENV=prod GIT_COMMIT_HASH=$(git rev-parse --short HEAD 2>/dev/null || echo unknown) \
-	go run -tags "webcli webbuild" ./cmd generate \
-	&& APP_ENV=prod GIT_COMMIT_HASH=$(git rev-parse --short HEAD 2>/dev/null || echo unknown) \
-	go run -tags "webcli webbuild" ./cmd build
+RUN GIT_COMMIT_HASH=$(git rev-parse --short HEAD 2>/dev/null || echo unknown) && \
+    export GIT_COMMIT_HASH && \
+    if [ -z "$MYELOPHONE_WEB_ENABLED" ]; then unset MYELOPHONE_WEB_ENABLED; fi && \
+    if [ "$(APP_ENV=prod go run ./cmd/webmode)" = "true" ]; then \
+	APP_ENV=prod go run -tags "webcli webbuild" ./cmd generate && \
+	APP_ENV=prod go run -tags "webcli webbuild" ./cmd build; \
+    else \
+	mkdir -p dist && APP_ENV=prod CGO_ENABLED=0 go build -tags myelophone_prod -o dist/goserver ./cmd; \
+    fi
 
 FROM alpine:latest
 

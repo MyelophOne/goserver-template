@@ -1,130 +1,68 @@
-# AGENTS.md
+# Project instructions
 
-Build the requested production application with **goserver**. GOSH is optional and is used only when a web UI is required.
+- Build the requested application with goserver. Inspect `git status`, relevant files, and the version in `go.mod`; verify APIs in that version's README/source before use.
+- Keep changes focused and preserve user code. Use goserver's documented subsystems before adding dependencies or infrastructure. Never patch, copy, vendor, or modify goserver or its module cache; report missing extension points.
+- Keep `cmd/main.go` for assembly. Add application code in new `app/*.go` files; do not edit `app/app.go`. Reserve `internal/` for generated code.
+- Do not edit generated, compiled, cached, or tool-owned files, including `internal/goservergen/**`, `cmd/web_import_gen.go`, `tmp/goserver/build/**`, and `dist/**`. Regenerate with repository tasks.
+- No placeholders, fake controls, TODO flows, invented facts, copied framework code, or inherited welcome page in a finished site. Comment only non-obvious code. Keep command output and responses concise.
+- Prevent memory and resource leaks: bound long-lived collections and caches, release references to objects no longer needed, close owned resources, stop timers, and remove event handlers and subscriptions when their lifecycle ends. When a leak is suspected, use profiling to investigate retained memory and goroutine growth.
 
-## 1. Rules
+## Select the mode
 
-- Inspect `git status`, repository docs/config, relevant code, and the goserver version selected by `go.mod`. Locate that dependency with `go list -m -json github.com/myelophone/goserver`; verify APIs in its README/source.
-- **Goserver native first.** Use its existing subsystem before writing application infrastructure or adding a dependency. Never add another router, server, SPA/state/CSS/i18n/theme/form/image/cache system.
-- Use only documented extension points. Never patch/copy/vendor goserver, modify its module cache, replace a native subsystem, or hide a limitation behind a workaround. Report a missing extension point.
-- Never edit generated, compiled, cached, vendored, or tool-owned files. Regenerate them with their owning task. This includes any generated file regardless of path, plus `internal/goservergen/**`, `cmd/web_import_gen.go`, `tmp/goserver/build/**`, and `dist/**`.
-- Preserve user changes and the selected dependency. Do not edit `app/app.go`; add neighboring `app/*.go` files.
-- No placeholders, dead controls, fake forms, TODO flows, invented facts, copied framework code, or inherited welcome page in a finished site.
-- Do not comment obvious code. Comments are only for genuinely non-obvious constraints or decisions.
+- **REST/API:** leave web disabled. Build with goserver Go routes in `app/*.go`; do not add GOSH pages or client UI.
+- **Website:** enable web. Use GOSH for pages and add Go routes when needed.
+- **Combined:** enable web. Use GOSH pages plus explicit Go API routes on the same listener; normally group APIs under `/api` and avoid catch-all routes that shadow pages.
+- Set `MYELOPHONE_WEB_ENABLED=true/false` or `runtime.enabled=true/false` in `websettings.json`. The environment variable takes precedence when present. Runtime and build tasks use the resolved value.
 
-## 2. Built-in capability index
+## Goserver capabilities
 
-Verify the selected version before use.
+Verify the selected version before using a feature.
 
-| Area | Goserver capabilities |
+| Area | Native capabilities |
 | --- | --- |
-| HTTP | method routes, params/wildcards, groups/group middleware, standard handlers, all request formats, validation, responses/errors, redirects/rewrites, templates/static assets |
-| Middleware | defaults/custom stack, hooks, logging/request IDs, recovery, headers, CSRF, limits, rate limiting, timeouts, load shedding, maintenance |
-| Web (optional) | GOSH SSR/file routes, layers/layouts/components, server actions/forms, islands/hydration, navigation/hooks/query/loading/errors/WebSockets |
-| Web platform (optional) | grid/UI/consent/SEO/i18n, Tailwind v4, themes/stores, images/content/search/commands/reveal/transitions, route rules/SWR/public-static, cache tags/optimistic actions, preload/prefetch, Early Hints/Server-Timing/Web Vitals |
-| Data/state | cookies, sessions, JWT/encryption, cache/idempotency, PostgreSQL helpers, Redis cache/sessions, tenants |
+| HTTP | Method routes, params/wildcards, groups/middleware, standard handlers, request formats, validation, responses/errors, redirects/rewrites, templates/static files |
+| Middleware | Defaults/custom stack, hooks, logging/request IDs, recovery, headers, CSRF, limits, rate limiting, timeouts, load shedding, maintenance |
+| Data/state | Cookies, sessions, JWT/encryption, cache/idempotency, PostgreSQL helpers, Redis cache/sessions, tenants |
 | Realtime | HTML/JSON streaming, SSE, NDJSON, WebSockets |
-| Integrations | resilient HTTP client, browser TLS, proxies/Webshare, HTML/soft-404 helpers, cron/jobs, SMTP, Telegram |
-| Operations | config/utility API, lifecycle/tracked jobs/shutdown, health, `/metricz`, pprof, logging, Docker, build and asset delivery |
+| Integrations | Resilient HTTP client, browser TLS, proxies/Webshare, HTML/soft-404 helpers, cron/jobs, SMTP, Telegram |
+| Operations | Config/utilities, lifecycle/tracked jobs/shutdown, health, `/metricz`, pprof, logging, Docker, build/assets |
+| GOSH, when enabled | SSR/file routes, layers/layouts/components, actions/forms, islands/hydration, navigation/hooks/query/loading/errors |
+| Web platform, when enabled | Grid/UI/consent/SEO/i18n, Tailwind v4, themes/stores, images/content/search/commands/reveal/transitions, route rules/SWR/public-static, cache tags/optimistic actions, preload/prefetch, Early Hints/Server-Timing/Web Vitals |
 
-Search goserver's public Go API, examples, `web/components`, `web/stores`, and `web/plugins` before implementing.
+## Server work: all modes
 
-## 3. Select the application mode
+- Use native routes (`s.GET`, `s.POST`, etc.), `s.Group`, `group.Use`, parsers, validators, responders, errors, lifecycle, clients, cache, and adapters. With `API_PREFIX`, do not repeat the prefix in route paths.
+- Use `ParseRequest` and `ValidationRule`/`Validate` for JSON, URL-encoded, and multipart input; keep field validation and response/error handling consistent across endpoints.
+- Define correct methods, DTOs, validation, status codes, and safe errors. Authenticate and authorize protected actions and objects. Bound input, uploads, pagination, concurrency, streams, and outbound work; propagate cancellation and use parameterized queries/transactions.
+- Keep CSRF, headers, origin checks, and rate/body limits. Separate cookie and bearer policies; CSRF trusted origins are not CORS. Read secrets from the environment; never log or return secrets or personal data.
+- Cache by complete locale/tenant/identity key. Use `TenantStore` for multi-tenancy. Use goserver i18n: `RegisterI18nFS` before `NewI18n`; API locales use `I18N_DEFAULT_LANGUAGE`/`I18N_LANGUAGES`.
 
-- **REST/API:** keep the web framework disabled. Do not create/use GOSH pages, layouts, components, stores, plugins, content, or client assets. Register goserver routes/groups and `http.HandlerFunc` handlers in new `app/*.go` files.
-- **Web:** enable the goserver web framework and follow section 4.
-- **Combined:** use GOSH pages plus explicit goserver API routes on the same listener. Explicit routes have priority over the web fallback.
+## Website work: only when requested
 
-Keep `cmd/main.go` for assembly. `internal/` is reserved for goserver-generated output, never application code. Startup is `NewServer → Defaults → hooks/config → i18n if used → EnableWeb if configured → Run`.
+- Keep routes thin in `web/pages`; put shared chrome in `layouts`, reusable sections in `components`, Go data/actions in `logic`, and optional file endpoints in `server`. Use other `web/` directories only for their named features; put public files in `assets/`.
+- Inherited files remain available; matching project files replace them. Development layers are `playground → project → goserver`; production layers are `project → goserver`. Do not create or override `web/system/**`.
+- Web pages, layouts, and components are `.gosh` files with exactly one `<template>`. Use optional `<head>`, `<style scoped>` for local CSS, plain `<style>` for intentional global CSS, `<script setup>` for setup code, and `<script>` for client code. Follow documented `.client.gosh`/`.server.gosh` rules; server components cannot contain ordinary `<script>` blocks.
+- Use documented GOSH file routes, layouts, and directives; do not assume Vue/Nuxt syntax. `web/logic` uses `package logic` and `github.com/myelophone/goserver/web/runtime`. Regenerate bindings after handler/import changes.
+- SSR initial content. Use documented `_gosh` navigation, actions/forms, hooks, stores, SEO, and loading. Use client behavior only when needed; do not alter runtime internals. Internal navigation uses real links.
+- Reuse native grid, UI, consent, SEO, search, image optimization, themes, and stores. Keep authority server-side. Async UI handles pending/empty/error/success and cleans up subscriptions/listeners.
+- Keep forms consistent with inherited `UiInput`, `UiTextarea`, `UiCheckbox`, `UiButton`, labels, field errors, and pending/success states. GOSH action forms use `data-gosh-form` and server `Action`/`props.Form()`; use `_gosh.useForm` only for client validation or reactive form state. Do not add an HTML `action` or custom submission transport for these forms. Validate and authorize again on the server; upload binaries through a protected endpoint.
+- Use goserver-managed Tailwind v4/PostCSS, existing utilities/tokens, `web/css/default.css`, and scoped component styles. Do not add a parallel CSS pipeline or use `@apply`, `@theme`, `@utility`, `@variant`, `!important`, or new breakpoints. Use `data-gosh-reveal` for entrance animation.
+- Use semantic headings, accessible controls, focus states, contrast, reduced motion, responsive images, and correct alt text. Fit one-screen sections to the real viewport with `dvh`, not fixed `100vh` or clipping. Set SEO metadata; exclude private pages from indexing.
+- Give each page one descriptive, visible `<h1>` near the start of `<main>`, consistent with its `<title>`; shared headers/layouts must not add another. Use `<h2>` for main sections and `<h3>` onward for subsections, without skipping levels or choosing levels for font size.
+- Prefer inherited `UiHeading` and goserver section components. Set their semantic `level` for the page outline and `size` for appearance; verify the final SSR heading order after composing components.
+- Web locales use `locales`/`defaultLocale` in `websettings.json`. Load non-essential external scripts through `cookieScripts` after consent when cookie control is enabled.
 
-## 4. Web framework rules
+## Website design
 
-### Project structure and layers
+- Before coding, define the audience, purpose, primary action, page structure, and visual direction. Infer sensible defaults from the brief.
+- Structure pages around visitors' questions and tasks. Every section must add useful information or enable an action; do not default to a generic hero, feature-card grid, testimonials, and CTA.
+- Write specific, informative copy. Avoid filler, repeated claims, and invented statistics, clients, reviews, or credentials.
+- Establish a coherent visual identity with deliberate typography, spacing, alignment, contrast, imagery, surfaces, and icon style. Avoid interchangeable templates, gratuitous gradients, glass, glow, blobs, and repetitive cards.
+- Use references for their useful design principles without copying branding or content. Keep the composition specific to the subject while using goserver's components and styling rules.
+- Design mobile layouts deliberately: prioritize content, adapt navigation, and simplify compositions rather than merely stacking desktop blocks.
+- Inspect rendered desktop and mobile pages. Refine weak hierarchy, awkward spacing, poor wrapping, unbalanced sections, and visual repetition before finishing.
 
-```text
-web/pages/       thin route compositions
-web/layouts/     shared shell
-web/components/ reusable UI and page sections
-web/logic/       Go render data/actions
-web/server/      optional file endpoints
-web/stores/      new public cross-component state
-web/plugins/     runtime extensions
-web/content/     Markdown content
-web/css/         all application global CSS/tokens
-web/global/      application head/script inserts
-web/modules/     explicitly imported modules
-web/teleport/    application teleports
-web/tenants/     tenant page/content overrides
-assets/          public images/fonts/icons/downloads
-```
+## Verify
 
-- Goserver is the base layer. Resolution in development is `playground → project → goserver`; production is `project → goserver` and excludes `web/playground/**`.
-- A matching project file fully replaces the lower-layer file; missing files stay inherited.
-- `web/system/**` is immutable. Never create, copy, modify, override, or extend any system runtime, CSS, Tailwind/PostCSS, client, logic, template, generated file, or plugin.
-- Pages compose section components; layouts own shared chrome. Split reusable or independently styled/interactive sections.
-
-### GOSH and runtime
-
-- Enable `runtime.enabled` only for web applications. Retain enabled consent/search/commands/preloader/shortcuts when replacing a layout.
-- A renderable `.gosh` file has exactly one `<template>`. Use verified GOSH syntax, not Vue/Nuxt syntax.
-- Omit `@layout` for the configured default. Use `@layout name` only for another layout and `@layout none` only to disable layouts.
-- File routes use `index.gosh`, `[id].gosh`, and `[...all].gosh`. Server logic uses `package logic` and `github.com/myelophone/goserver/web/runtime`; regenerate bindings after handler/import changes.
-- SSR initial content. Use client components, hydration, `ClientOnly`, and `useQuery` only for actual client behavior.
-- Use documented `_gosh` navigation, hooks, actions/forms, query, stores, SEO, and loading. Never touch `/_gosh/*`, runtime tokens, or internal markup.
-- Internal navigation uses real links. Do not use `data-runtime-off`, `window.location`, or reloads as fixes.
-- Async UI has pending/empty/error/success states and cleans up listeners, observers, timers, and subscriptions.
-
-### Native components, themes, stores, forms
-
-- Inspect/reuse inherited `Grid*`, `Ui*`, `View*`, `Cookie*`, `Consent*`, and `Seo*` components.
-- Use `GridContainer` and `--layout-container-*`. Header, navigation, sections, and footer share one grid.
-- Use `--ui-*`, `data-theme`, and the `preferences` store. New UI works in every enabled theme. Do not duplicate theme state/storage.
-- Use the inherited `ui` store for its modal/search/command/language state and `cookies` for consent. New `web/stores/*.js` are only for genuinely new public shared state; hydrate public SSR state with `runtime.UseStoreState`. Keep secrets/authority server-side.
-- Do not use `data-gosh-store-*` bindings. Use an inherited component or a proper client component with the documented store API.
-- Forms must be visually and behaviorally consistent through goserver's inherited form controls, validation/error patterns, and GOSH form/action contract. Do not build parallel controls, custom submission transports, or per-form loading/error conventions. Validate and authorize again on the server; binary uploads use a protected upload endpoint.
-- Use goserver image/picture optimization, search, command palette, loading/preloader, consent, and SEO instead of substitutes.
-- Entrance animation uses `data-gosh-reveal` and its documented speed/step/repeat options. Do not add reveal libraries, scroll listeners, or another `IntersectionObserver`.
-
-### Tailwind v4 and CSS
-
-- Tailwind CSS v4 utilities are the default styling method. Use the goserver-managed Tailwind/PostCSS toolchain; do not install/configure another Tailwind, PostCSS, package, lockfile, or CSS build.
-- Application CSS belongs only in `web/css/default.css`, its local `web/css/**` imports, or component `<style scoped>`.
-- Application files must not use `@apply`, `@theme`, `@utility`, `@variant`, Tailwind configuration directives, PostCSS plugins, CSS `!important`, or Tailwind important modifiers.
-- Prefer inherited components, standard utilities, and existing tokens over arbitrary values or duplicated component CSS.
-- Use inherited Tailwind v4 breakpoints (`sm`, `md`, `lg`, `xl`, `2xl`) and goserver container tokens; do not invent breakpoints/containers.
-
-### Visual and responsive quality
-
-- Define one coherent palette, type system, spacing rhythm, surfaces, and icon family. Use intentional fonts with fallbacks; self-host licensed files and load only used weights.
-- Avoid generic AI styling: gratuitous gradients/glass/glow/blobs, pills everywhere, empty oversized heroes, and repetitive card grids.
-- Long text uses the text container and a readable measure. Use semantic landmarks/headings, real links/buttons, labels, visible focus, keyboard support, contrast, reduced motion, and correct alt text.
-- A one-screen section fits the available visual viewport in both axes, including content, header, padding, safe areas, and mobile browser chrome. Use applicable goserver viewport/snap components and `dvh`, never fixed `100vh` or guessed heights. Adapt or split content; never clip/mask overflow.
-- Images have dimensions/aspect ratios, responsive sizing, deliberate crops, alt text, and verified production loading. Do not lazy-load critical above-fold media.
-- Set title, description, canonical, favicon, social image, and indexing policy. Private pages stay out of search/sitemaps.
-
-### i18n and consent
-
-- Use goserver i18n, never custom maps or duplicated language page trees. Dictionaries live at `i18n/<language>/<namespace>.json` and are registered with `RegisterI18nFS` before `NewI18n`.
-- With web enabled, configure locale routes through `locales`/`defaultLocale` in `websettings.json`; without web use `I18N_DEFAULT_LANGUAGE`/`I18N_LANGUAGES`.
-- Web logic uses `ctx.T`; handlers use goserver `L`/`Lf`/plural helpers. Verify localized SSR, metadata, `html[lang]`, canonical/hreflang, direct loads, refresh, runtime navigation, and history.
-- When `cookieControl.enabled` is true, every non-essential external script belongs in `cookieScripts` under the correct `analytics`, `marketing`, or `functional` category and loads only after consent. Do not insert it directly into global scripts, layouts, or components. Use consent components/wrappers for external embeds; classify as `necessary` only when strictly required for core operation.
-
-## 5. Backend and security
-
-- Use goserver routing, middleware, parsers, validators, responders, errors, lifecycle/jobs, HTTP client, cache, and adapters.
-- Register APIs with goserver's `s.GET`/`POST`/`PUT`/`PATCH`/`DELETE`/`HEAD`/`OPTIONS` methods or `s.Group`; attach shared middleware with `group.Use`. Use params/wildcards from the native router. With `API_PREFIX`, register routes without repeating the external prefix. In combined applications normally keep the global prefix empty and put APIs in an `/api` group; never add a root/catch-all route that shadows the web fallback.
-- Define methods, DTOs, validation, statuses, authorization, and safe errors. Never mutate through GET or return `200` for every result.
-- Authenticate/authorize every protected operation, including object access. Never trust client identity, tenant, role, or price.
-- Bound bodies, uploads, pagination, concurrency, streams, and outbound work. Propagate context/cancellation; use parameterized queries and transactions.
-- Keep CSRF, security headers, origin checks, and rate/body limits. Cookie and bearer auth use separate policies; CSRF trusted origins are not CORS.
-- Secrets come from environment. Never log/return secrets, tokens, cookies, SQL, stacks, or personal data.
-- Cache only output safe for its complete locale/tenant/identity key. Public/static routes must be identical for every visitor.
-- Multi-tenancy uses `TenantStore` middleware and `web/tenants/<id>/{pages,content}`; do not build another tenant resolver or duplicate site trees.
-
-## 6. Validation
-
-- Use repository tasks for the selected mode. API-only work does not generate web artifacts. Web work regenerates bindings through the standard web run/build tasks.
-- Format and run relevant tests, vet, production build, and the built server. Exercise success, validation, error, authorization, and asset paths.
-- Browser-check web work across every used goserver breakpoint and enabled theme: direct/refresh/history navigation, forms, stores, i18n, overflow, viewport-height sections, focus, reduced motion, console/network errors, and loaded images.
-- Review the diff for user changes, secrets, generated files, framework copies, redundant implementations, dependencies, and placeholders.
-- Report compilation, tests, production execution, and visual verification separately.
+- Format changed code and run relevant checks only. Build/run production and inspect browser output when needed for the changed behavior. Avoid repeated passing checks and long logs.
+- Review the diff for user changes, secrets, generated files, copied framework code, unnecessary dependencies, and placeholders. Report meaningful verification results briefly.

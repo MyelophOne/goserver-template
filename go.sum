@@ -24,8 +24,8 @@ github.com/hashicorp/golang-lru v1.0.2 h1:dV3g9Z/unq5DpblPpw+Oqcv4dU/1omnb4Ok8iP
 github.com/hashicorp/golang-lru v1.0.2/go.mod h1:iADmTwqILo4mZ8BN3D2Q6+9jd8WM5uGBxy+E8yxSoD4=
 github.com/klauspost/compress v1.18.2 h1:iiPHWW0YrcFgpBYhsA6D1+fqHssJscY/Tm/y2Uqnapk=
 github.com/klauspost/compress v1.18.2/go.mod h1:R0h/fSBs8DE4ENlcrlib3PsXS61voFxhIs2DeRhCvJ4=
-github.com/myelophone/goserver v0.8.3 h1:hxLbPzhbo/l3h5KJKkA430W6TlafBtceB7b4XL28Ne4=
-github.com/myelophone/goserver v0.8.3/go.mod h1:pGeV23ZUQlxuFuWqCtDGYl54Z0jQ5SwyO62v1mVSatk=
+github.com/myelophone/goserver v0.8.4 h1:Lxtdkgu1/jpYhFXCIxoL7ohJp7vmIlKTUg3uZQoJ4Xk=
+github.com/myelophone/goserver v0.8.4/go.mod h1:pGeV23ZUQlxuFuWqCtDGYl54Z0jQ5SwyO62v1mVSatk=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/quic-go/qpack v0.6.0 h1:g7W+BMYynC1LbYLSqRt8PBg5Tgwxn214ZZR34VIOjz8=

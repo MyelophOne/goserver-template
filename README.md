@@ -4,7 +4,21 @@ A starting point for your own Go application, powered by [goserver](https://gith
 
 [Create a repository from this template](https://github.com/myelophone/goserver-template/generate) · [goserver README and API documentation](https://github.com/myelophone/goserver/blob/main/README.md)
 
-This README explains how to use the template. For routing, middleware, sessions, databases, caching, WebSockets and the full web-framework reference, use the upstream documentation.
+This README explains how to use the template. `AGENTS.md` contains the concise instructions for AI agents. Verify APIs against the goserver version selected in `go.mod`; use the [upstream documentation](https://github.com/myelophone/goserver/blob/main/README.md) for details.
+
+## Choose what to build
+
+The template supports three modes. Choose from the requested product, not from the presence of `web/` files in the template.
+
+| Mode | Use | Configuration |
+| --- | --- | --- |
+| REST/API | goserver Go routes and handlers in `app/*.go` | Leave web disabled; no GOSH pages or client UI |
+| Website | GOSH pages, layouts and components; Go routes when needed | Enable web |
+| Combined | GOSH pages and explicit goserver API routes on one listener | Enable web; normally group APIs under `/api` |
+
+Goserver's HTTP features work in every mode: method routes, params, groups and middleware; parsing, validation and responses; cookies, sessions, JWT, cache, PostgreSQL/Redis helpers, tenants, jobs, HTTP clients, streaming, SSE and WebSockets. Use the capabilities relevant to the application and verify them in the selected dependency version. GOSH adds `.gosh` page, layout, and component files, SSR, forms/actions, client behavior, and web assets when a site is required.
+
+Enable web with `runtime.enabled=true` in `websettings.json` or `MYELOPHONE_WEB_ENABLED=true` in the environment. The environment variable takes precedence when set. `cmd/main.go`, Task, and Docker use the resolved value; when it is false, they use the plain server without GOSH generation.
 
 ## Quick start
 
@@ -31,13 +45,13 @@ Copy-Item .env.example .env
 
 Review `.env`, especially `HTTP_PORT`, trusted origins and secret values. Replace the example `SESSION_KEY`, `JWT_SECRET` and `METRICS_SECRET` before deployment. Do not commit secrets.
 
-For GOSH pages, set `runtime.enabled` to `true` in `websettings.json`, or add this to `.env`:
+For a website or combined application, set `runtime.enabled` to `true` in `websettings.json`, or add this to `.env`:
 
 ```dotenv
 MYELOPHONE_WEB_ENABLED=true
 ```
 
-The checked-in web settings have web rendering disabled. Enable it explicitly if you want the inherited home page and other web pages.
+The checked-in settings disable GOSH rendering. If `.env` contains `MYELOPHONE_WEB_ENABLED`, that value overrides `websettings.json`.
 
 Start the application:
 
@@ -47,7 +61,7 @@ task run
 
 Open `http://localhost:8080`, or the port configured in `.env`. Web-enabled projects inherit the base goserver home page even when local `web/pages` is absent or empty. `/healthz` is available for health checks.
 
-`task run` generates handler bindings before starting. Its setup dependency installs the web builders automatically on first use; `task setup` can also be run separately. The template's current run/build workflows invoke web tooling even when rendering is disabled, so they still require Node.js.
+For web applications, `task run` generates handler bindings and installs the web builders on first use; `task setup` can also be run separately. REST-only `task run` needs no web generation or Node.js.
 
 ## Make it your application
 
@@ -128,7 +142,7 @@ Create `web/pages/index.gosh` for a minimal custom home page:
 
 Omit the layout directive to use the configured default layout. File-based routing supports `index.gosh`, `[id].gosh` and `[...all].gosh`.
 
-You do not need a local `web/system` directory. It is inherited; create individual files there only when intentionally overriding framework resources. For application styling, prefer `web/css/default.css`, which follows the system CSS in the cascade.
+Do not create or override `web/system/**`; it belongs to the framework. For application styling, use `web/css/default.css` or local component styles. The application CSS follows system CSS in the cascade.
 
 ### Local Go handlers
 
@@ -179,10 +193,10 @@ See [goserver configuration](https://github.com/myelophone/goserver/blob/main/RE
 | Command                                | Purpose                                                            |
 | -------------------------------------- | ------------------------------------------------------------------ |
 | `task setup`                           | Install/reuse the cached esbuild, Tailwind and PostCSS builders.   |
-| `task run`                             | Generate bindings and run with development settings.               |
-| `task dev`                             | Generate bindings and start Air live reload; requires Air.         |
+| `task run`                             | Run in development; generate web bindings when web is enabled.      |
+| `task dev`                             | Run with Air live reload; requires Air.                            |
 | `task preview`                         | Run source with production settings; not the built distribution.   |
-| `task build`                           | Create the production distribution in `dist/`.                     |
+| `task build`                           | Build the selected plain-server or web distribution in `dist/`.   |
 | `task server -- [args]`                | Run the built executable, forwarding arguments.                    |
 | `task web:generate`                    | Regenerate page/component and server-handler bindings.             |
 | `task web:asset-report`                | Write the compiled asset report to `tmp/web-assets.json`.          |
@@ -230,7 +244,7 @@ For a container deployment:
 docker compose up --build
 ```
 
-The builder uses Go and Node to compile the web distribution. The final container is non-root Alpine with the executable and disk assets; it has no Go/Node toolchain. Compose reads `.env` and configures health checks, restart behavior and bounded logs. Review `DOCKER_PORT_BINDING`: the example binds a random local host port, so choose an explicit mapping when needed, for example `127.0.0.1:8080:8080`.
+Compose passes `MYELOPHONE_WEB_ENABLED` to the Docker build. REST-only builds compile the plain server; web builds also use Node for assets. The final container has no build toolchain. Compose reads `.env` and configures health checks, restart behavior and bounded logs. Review `DOCKER_PORT_BINDING`: the example binds a random local host port, so choose an explicit mapping when needed, for example `127.0.0.1:8080:8080`.
 
 ## Update the framework, not a copied web tree
 

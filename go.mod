@@ -2,7 +2,7 @@ module github.com/myelophone/goserver-template
 
 go 1.27.1
 
-require github.com/myelophone/goserver v0.8.3
+require github.com/myelophone/goserver v0.8.4
 
 require (
 	github.com/andybalholm/brotli v1.2.0 // indirect

@@ -515,6 +515,22 @@ coverage.html
 
 # local resources
 .local/
+
+# Local tool caches and temporary build directories
+**/.tmp-*/
+**/.cache/
+**/.gocache/
+**/.gomodcache/
+**/.go-cache/
+**/.go-mod-cache/
+**/.npm/
+**/.pnpm-store/
+**/.yarn/cache/
+**/__pycache__/
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+
 web/system/generated/*
 !web/system/generated/stub.go
 internal/goservergen/

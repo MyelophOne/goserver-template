@@ -38,7 +38,7 @@ func main() {
 		server.Logger.Fatal(err)
 	}
 
-	if err := server.EnableWeb(); err != nil {
+	if err := server.EnableWebIfEnabled(); err != nil {
 		server.Logger.Fatal(err)
 	}
 

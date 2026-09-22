@@ -9,7 +9,9 @@ vars:
   EXT:
     sh: go env GOEXE
   BIN: "./dist/goserver{{.EXT}}"
-  WEBBIN: "./dist/goserver{{.EXT}}"
+  CONFIG_WEB_ENABLED:
+    sh: go run ./cmd/webmode
+  WEB_ENABLED: '{{if .MYELOPHONE_WEB_ENABLED}}{{.MYELOPHONE_WEB_ENABLED}}{{else}}{{.CONFIG_WEB_ENABLED}}{{end}}'
 
 tasks:
   setup:
@@ -78,7 +80,7 @@ tasks:
     silent: true
     cmds:
       - cmd: echo "Start running app..."
-      - task: web:generate
+      - task: '{{if eq .WEB_ENABLED "true"}}web:generate{{end}}'
       - go run ./cmd
   dev:
     env:
@@ -86,7 +88,7 @@ tasks:
     silent: true
     cmds:
       - cmd: echo "Start dev running app..."
-      - task: web:generate
+      - task: '{{if eq .WEB_ENABLED "true"}}web:generate{{end}}'
       - air -c .air.toml
   preview:
     env:
@@ -94,7 +96,7 @@ tasks:
     silent: true
     cmds:
       - cmd: echo "Start previewing app..."
-      - task: web:generate
+      - task: '{{if eq .WEB_ENABLED "true"}}web:generate{{end}}'
       - go run ./cmd
   profile:
     silent: true
@@ -102,13 +104,15 @@ tasks:
       MYELOPHONE_WEB_RENDER_SERVER_TIMING: "true"
     cmds:
       - cmd: echo "Start building app with profiling..."
-      - task: web:build:profile
+      - task: '{{if eq .WEB_ENABLED "true"}}web:build:profile{{end}}'
+      - task: '{{if ne .WEB_ENABLED "true"}}build:server{{end}}'
       - cmd: echo "Done! Use \"task server\" command to run it."
   build:
     silent: true
     cmds:
       - cmd: echo "Start building app..."
-      - task: web:build
+      - task: '{{if eq .WEB_ENABLED "true"}}web:build{{end}}'
+      - task: '{{if ne .WEB_ENABLED "true"}}build:server{{end}}'
       - cmd: echo "Done! Use \"task server\" command to run it."
   build:server:
     internal: true
@@ -120,20 +124,9 @@ tasks:
       - CGO_ENABLED=0 GOFLAGS="-trimpath" go build -tags myelophone_prod -pgo=auto -ldflags="-s -w -X github.com/myelophone/goserver.AppEnv=prod -X github.com/myelophone/goserver.AppVersion=${GIT_COMMIT_HASH}" -o {{.BIN}} ./cmd
   server:
     silent: true
+    dir: dist
     cmds:
       - cmd: echo "Starting app..."
-      - task: server:web
-  server:web:
-    internal: true
-    silent: true
-    dir: dist
-    cmds:
-      - "./goserver{{.EXT}} {{.CLI_ARGS}}"
-  server:plain:
-    internal: true
-    silent: true
-    dir: dist
-    cmds:
       - "./goserver{{.EXT}} {{.CLI_ARGS}}"
   lint:
     cmds:
@@ -149,7 +142,7 @@ tasks:
       - govulncheck ./...
   test:
     cmds:
-      - go test -v ./...
+      - go test ./...
   clean:
     cmds:
       - go clean -cache
