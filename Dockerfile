@@ -23,9 +23,11 @@ RUN GIT_COMMIT_HASH=$(git rev-parse --short HEAD 2>/dev/null || echo unknown) &&
 	APP_ENV=prod go run -tags "webcli webbuild" ./cmd build; \
     else \
 	mkdir -p dist && APP_ENV=prod CGO_ENABLED=0 go build -tags myelophone_prod -o dist/goserver ./cmd; \
-    fi
+    fi && \
+    mkdir -p dist/assets && \
+    APP_ENV=prod go run ./cmd/nginxconf -out dist/nginx/route-cache.conf
 
-FROM alpine:latest
+FROM alpine:3.23 AS goserver
 
 WORKDIR /app
 
@@ -48,3 +50,9 @@ LABEL org.opencontainers.image.source="https://github.com/myelophone/goserver-te
 EXPOSE 8080
 
 CMD ["./goserver"]
+
+FROM nginx:1.29-alpine AS nginx
+
+COPY nginx/nginx.conf /etc/nginx/nginx.conf
+COPY --from=builder /app/dist/nginx/route-cache.conf /etc/nginx/conf.d/route-cache.conf
+COPY --from=builder /app/dist/assets/ /usr/share/nginx/html/assets/

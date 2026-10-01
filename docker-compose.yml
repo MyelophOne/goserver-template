@@ -3,15 +3,16 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      target: goserver
       args:
         MYELOPHONE_WEB_ENABLED: ${MYELOPHONE_WEB_ENABLED:-}
     expose:
-      - "${HTTP_PORT:-8080}"
+      - "8080"
     env_file:
       - path: .env
         required: false
     environment:
-      - HTTP_PORT=${HTTP_PORT:-8080}
+      - HTTP_PORT=8080
     restart: on-failure
     deploy:
       restart_policy:
@@ -24,6 +25,37 @@ services:
         "CMD-SHELL",
         "wget -q --user-agent='Mozilla/5.0' -O /dev/null http://127.0.0.1:8080/healthz || exit 1"
           ]
+      interval: 90s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+        compress: "true"
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: nginx
+      args:
+        MYELOPHONE_WEB_ENABLED: ${MYELOPHONE_WEB_ENABLED:-}
+    depends_on:
+      goserver:
+        condition: service_healthy
+    ports:
+      - "${DOCKER_PORT_BINDING:-127.0.0.1:8080:8080}"
+    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+        window: 300s
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --user-agent='Mozilla/5.0' -O /dev/null http://127.0.0.1:8080/healthz || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -34,3 +66,8 @@ services:
         max-size: "50m"
         max-file: "3"
         compress: "true"
+    volumes:
+      - nginx-cache:/var/cache/nginx
+
+volumes:
+  nginx-cache:
