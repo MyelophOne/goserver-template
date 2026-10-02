@@ -244,7 +244,15 @@ For a container deployment:
 docker compose up --build
 ```
 
-Compose passes `MYELOPHONE_WEB_ENABLED` to the Docker build. REST-only builds compile the plain server; web builds also use Node for assets. The final deployment has Nginx in front of goserver: it serves `/assets/` directly from the production build and proxies all other requests to the private goserver container. Nginx only caches routes declared `publicStatic: true`; its generated cache eligibility follows the resolved production `routeRules`, while goserver's `Cache-Control` response (derived from `cache.maxAge` and `swr`) determines the cache lifetime. This preserves the framework's protection for hydrated or visitor-specific SSR pages. Compose reads `.env` and configures health checks, restart behavior and bounded logs. Review `DOCKER_PORT_BINDING`: the example binds a random local host port, so choose an explicit mapping when needed, for example `127.0.0.1:8080:8080`.
+This default Compose deployment has Nginx in front of goserver: it serves `/assets/` directly from the production build and proxies all other requests to the private goserver container. Nginx only caches routes declared `publicStatic: true`; its generated cache eligibility follows the resolved production `routeRules`, while goserver's `Cache-Control` response (derived from `cache.maxAge` and `swr`) determines the cache lifetime. This preserves the framework's protection for hydrated or visitor-specific SSR pages.
+
+For a direct goserver deployment without Nginx:
+
+```bash
+docker compose -f docker-compose.goserver.yml up --build
+```
+
+The direct Compose file uses its own `Dockerfile.goserver`, so deployment tools only need that Compose file and the repository; it has no Nginx service or Docker build target. Both Compose files pass `MYELOPHONE_WEB_ENABLED` to the Docker build. REST-only builds compile the plain server; web builds also use Node for assets. They read `.env` and configure health checks, restart behavior and bounded logs. Review `DOCKER_PORT_BINDING`: the example binds a random local host port, so choose an explicit mapping when needed, for example `127.0.0.1:8080:8080`.
 
 ## Update the framework, not a copied web tree
 

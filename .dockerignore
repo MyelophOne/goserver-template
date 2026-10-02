@@ -20,8 +20,10 @@ coverage/
 
 # Docker files and configurations
 Dockerfile
+Dockerfile.goserver
 .dockerignore
 docker-compose.yml
+docker-compose.goserver.yml
 
 #.git/
 #.git/
