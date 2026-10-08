@@ -2,7 +2,7 @@ module github.com/myelophone/goserver-template
 
 go 1.27.1
 
-require github.com/myelophone/goserver v0.9.0
+require github.com/myelophone/goserver v0.9.1
 
 require (
 	github.com/andybalholm/brotli v1.2.6 // indirect
@@ -20,10 +20,10 @@ require (
 	github.com/quic-go/qpack v0.6.0 // indirect
 	github.com/rs/xid v1.6.0 // indirect
 	github.com/tam7t/hpkp v0.0.0-20160821193359-2b70b4024ed5 // indirect
-	github.com/tdewolff/minify/v2 v2.24.17 // indirect
+	github.com/tdewolff/minify/v2 v2.24.19 // indirect
 	github.com/tdewolff/parse/v2 v2.8.16 // indirect
 	golang.org/x/crypto v0.57.0 // indirect
-	golang.org/x/net v0.59.0 // indirect
+	golang.org/x/net v0.60.0 // indirect
 	golang.org/x/sync v0.23.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect
 	golang.org/x/text v0.42.0 // indirect
