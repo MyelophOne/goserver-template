@@ -2,7 +2,7 @@ FROM node:26-alpine AS web-deps
 
 FROM golang:alpine AS builder
 
-RUN apk add --no-cache git libstdc++
+RUN apk add --no-cache git libstdc++ libatomic
 
 WORKDIR /app
 
@@ -14,6 +14,8 @@ RUN go mod download
 
 COPY . .
 COPY --from=web-deps /usr/local/bin/node /usr/local/bin/node
+
+RUN node --version
 
 RUN GIT_COMMIT_HASH=$(git rev-parse --short HEAD 2>/dev/null || echo unknown) && \
     export GIT_COMMIT_HASH && \
